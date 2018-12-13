@@ -1,0 +1,11 @@
+FROM frolvlad/alpine-glibc
+
+RUN apk upgrade && apk add curl
+
+ADD ./envoy /
+RUN chmod u+x /envoy
+
+ADD ./envoy.yaml /etc/
+
+
+CMD /envoy --v2-config-only -l info -c /etc/envoy.yaml

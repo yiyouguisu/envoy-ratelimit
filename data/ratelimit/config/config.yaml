@@ -1,0 +1,25 @@
+---
+domain: apis
+descriptors:
+  - key: generic_key
+    value: default
+    rate_limit:
+      unit: second
+      requests_per_unit: 5
+
+  - key: header_match
+    value: default
+    rate_limit:
+      unit: second
+      requests_per_unit: 5
+
+  - key: request_headers_name
+    value: xixi
+    rate_limit:
+      unit: second
+      requests_per_unit: 5
+  - key: name
+    value: xixi
+    rate_limit:
+      unit: second
+      requests_per_unit: 5

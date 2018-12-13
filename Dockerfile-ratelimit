@@ -1,0 +1,9 @@
+FROM alpine:latest
+
+ADD ./ratelimit /
+RUN chmod u+x /ratelimit
+
+ADD ./data /data
+
+
+CMD /ratelimit

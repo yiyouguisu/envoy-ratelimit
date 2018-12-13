@@ -1,0 +1,115 @@
+static_resources:
+  listeners:
+  - address:
+      socket_address:
+        address: 0.0.0.0
+        port_value: 80
+    filter_chains:
+    - filters:
+      - name: envoy.http_connection_manager
+        config:
+          generate_request_id: true
+          tracing:
+            operation_name: egress
+          codec_type: auto
+          stat_prefix: ingress_http
+          route_config:
+            name: local_route
+            virtual_hosts:
+            - name: service
+              domains:
+              - "*"
+              routes:
+              - match:
+                  prefix: "/"
+                route:
+                  cluster: service
+                  retry_policy:
+                    retry_on: "5xx"
+                    num_retries: 3
+                    per_try_timeout: 2s
+              rate_limits:
+                - stage: 0
+                  actions:
+                    # - {generic_key: {descriptor_value: "default"}}
+                    - {header_value_match: {descriptor_value: "default", expect_match: "true", headers: [{name: "name", exact_match: "xixi"}]}}
+                    # - {request_headers: {descriptor_key: "request_headers_name", header_name: "name"}}
+          http_filters:
+          - name: envoy.rate_limit
+            config:
+              domain: apis
+              stage: 0
+          - name: envoy.router
+            config: {}
+  - address:
+      socket_address:
+        address: 0.0.0.0
+        port_value: 8090
+    filter_chains:
+    - filters:
+      - name: envoy.ratelimit
+        config:
+          stat_prefix: "envoy.ratelimit.8090"
+          domain: apis
+          descriptors: {entries: [{key: "name",value: "xixi"}]}
+      - name: envoy.http_connection_manager
+        config:
+          generate_request_id: true
+          tracing:
+            operation_name: egress
+          codec_type: auto
+          stat_prefix: ingress_http
+          route_config:
+            name: local_route
+            virtual_hosts:
+            - name: service
+              domains:
+              - "*"
+              routes:
+              - match:
+                  prefix: "/"
+                route:
+                  cluster: service
+                  retry_policy:
+                    retry_on: "5xx"
+                    num_retries: 3
+                    per_try_timeout: 2s
+          http_filters:
+          - name: envoy.router
+            config: {}
+  clusters:
+  - name: service
+    connect_timeout: 0.250s
+    type: strict_dns
+    lb_policy: round_robin
+    http2_protocol_options: {}
+    hosts:
+    - socket_address:
+        address: service
+        port_value: 80
+  - name: rate_limit_cluster
+    type: strict_dns
+    connect_timeout: 0.25s
+    lb_policy: round_robin
+    http2_protocol_options: {}
+    hosts:
+    - socket_address:
+        address: ratelimit
+        port_value: 8081
+rate_limit_service:
+    grpc_service:
+        envoy_grpc:
+            cluster_name: rate_limit_cluster
+        timeout: 0.25s
+tracing:
+  http:
+    name: envoy.local
+    config:
+      collector_cluster: local
+      collector_endpoint: /var/log/trace_log.log
+admin:
+  access_log_path: "/var/log/envoy_log.log"
+  address:
+    socket_address:
+      address: 0.0.0.0
+      port_value: 9901
