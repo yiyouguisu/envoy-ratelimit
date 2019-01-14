@@ -51,7 +51,7 @@ static_resources:
         config:
           stat_prefix: "envoy.ratelimit.8090"
           domain: apis
-          descriptors: {entries: [{key: "name",value: "xixi"}]}
+          descriptors: [{entries: [{key: "name",value: "xixi"}]}]
       - name: envoy.http_connection_manager
         config:
           generate_request_id: true
