@@ -24,6 +24,10 @@ static_resources:
                   prefix: "/"
                 route:
                   cluster: service
+                  rate_limits:
+                    - stage: 0
+                      actions:
+                        - {generic_key: {descriptor_value: "default"}}
                   retry_policy:
                     retry_on: "5xx"
                     num_retries: 3

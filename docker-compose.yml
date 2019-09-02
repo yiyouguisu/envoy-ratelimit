@@ -20,7 +20,7 @@ services:
       - ratelimit-network
     environment:
       - USE_STATSD=false
-      - LOG_LEVEL=info
+      - LOG_LEVEL=debug
       - REDIS_SOCKET_TYPE=tcp
       - REDIS_URL=redis:6379
       - RUNTIME_ROOT=/data
@@ -50,24 +50,24 @@ services:
       - "8090"
       - "9901"
     ports:
-      - "80:80"
+      - "8081:80"
       - "8090:8090"
       - "9901:9901"
     depends_on:
      - ratelimit
      - service
 
-  prometheus:
-    build:
-      context: ./
-      dockerfile: Dockerfile-prometheus
-    command: --config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/prometheus
-    networks:
-      - ratelimit-network
-    ports:
-     - 9090:9090
-    depends_on:
-     - envoy
+  # prometheus:
+  #   build:
+  #     context: ./
+  #     dockerfile: Dockerfile-prometheus
+  #   command: --config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/prometheus
+  #   networks:
+  #     - ratelimit-network
+  #   ports:
+  #    - 9090:9090
+  #   depends_on:
+  #    - envoy
       
   
 
